@@ -1,0 +1,14 @@
+name: "WHO_RSV_Review"
+output_dir: "."
+navbar:
+  title: "Effect of Early Life RSV LRTI on Wheezing Illness"
+  left:
+    - text: "Analytic Summary"
+      href: index.html
+    - text: "About"
+      href: about.html
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate
+  
