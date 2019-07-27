@@ -1,5 +1,5 @@
 ---
-title: "Project Background"
+title: "Purpose"
 ---
 
-The purpose of this website is to provide a detailed summary of the analytic approach for the paper: _Assessing causal inference of respiratory syncytial virus lower respiratory tract infection on subsequent wheezing illness using meta analytic strategies_.
+The purpose of this website is to provide a detailed summary of the analytic approach for the paper: <b>Assessing causal inference of respiratory syncytial virus lower respiratory tract infection on subsequent wheezing illness using meta analytic strategies</b>.
