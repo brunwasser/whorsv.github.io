@@ -278,6 +278,7 @@ looplot_labeller <- function(variable,value){
   return(looplotlabels[value])
 }
 
+
 ( looplot <- ggplot( looplotdf ) +
             geom_segment( aes( x=cilow, y=studynames, xend=ciup, yend=studynames ) ) +
             geom_point( aes( x=est, y=studynames) ) +
@@ -294,6 +295,7 @@ looplot_labeller <- function(variable,value){
               axis.text.y = element_text( size=10, face = 'bold'),
               strip.text.x = element_text(size=14, face='bold') ) 
   )
+
 ```
 
 This figure shows that, for all four primary parameters of interest, the removal of any one study (and all of its estimates) does not alter whether the 95% confidence interval contains the null value (log~e~OR=0). No individual study had sufficient leverage to alter our primary conclusion. In sum, the effects were robust and not driven by any one study. 
@@ -383,14 +385,19 @@ table( whoprophyl$rct )
 ```
 
 ```{r echo=F}
-whoprophyl$eslab <- c('Parent-report asthma','Physician dx asthma','Wheeze ages 1-3',
-                      'Recurrent wheeze','Any wheeze','Serious wheeze','3+ med.-attended wheeze',
+whoprophyl$eslab <- c( 'Serious wheeze', ## O'Brien -.06
+                       '3+ med.-attended wheeze', ## O'Brien -.09
+                       'Parent-reported asthma', ## Scheltema 0.66
+                       'Physician dx asthma', ## Scheltema -0.04
+                       'Wheeze ages 1-3', ## Scheltema 0.51
+                       'Recurrent wheeze', ## Blanken 2013 0.74
+                       'Any wheeze', ## Blanken 2013 0.69
                       'Asthma (multivariable)','Asthma (propensity-matched)','Asthma (propensity-adj.)','Atopic asthma',
                       'Dx. recurrent wheeze','Dx. recurrent wheeze','Dx. recurrent wheeze',
                       'Recurrent wheeze (not dx.)','Parent report asthma','Wheezing episode',
                       'Wheezing episode','Asthma hospital/rx (frailty model)',
                       'Asthma hospital (frailty model)','Asthma hospital/rx (cox model)',
-                      'sthma hospital (cox model)','Recurrent wheeze')
+                      'Asthma hospital (cox model)','Recurrent wheeze')
 
 whoprophyl$ageoutcome <- c('6','6','1-3','1','1','1-3','1-3','5','5','5','6','6','3','4','4',
                            '2','2','9','4','4','4','4','3'
@@ -451,6 +458,7 @@ yaxis.studytypelab <- c('Observational: Naive estimates',
                         'RCTs')
 yaxis.summarylab <- c('Mean OR: All Studies','Mean OR: No naive estimates')
 
+#tiff( 'Fig4.tif', width = 8, units = 'in', height = 10, res = 300 )
 par( mar= c(6.2,16,1,12), xpd=T, oma=c( 0,0,0,0 ) ) 
 with( prophylplot1, plot( logor, yaxis.or, type = 'p', pch = 15, 
                          xlim = c( -3, 3 ), ylim =c( 0, max(yaxis.or)*1.1), 
@@ -507,6 +515,7 @@ with( prophylplot1, text( x=6.5, y = 15, labels = '-0.14, 0.83', las = 2, font =
 ## Main title
 with( prophylplot1, text( x=-12, y = max(yaxis.or)+5, labels = 'RSV Immunoprophylaxis Studies', las = 2, font = 2, 
                           col = 1, cex = 1.5, xpd = T, pos=4 ) )
+#dev.off()
 ```
 
 

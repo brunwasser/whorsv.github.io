@@ -729,6 +729,7 @@ looplot_labeller &lt;- function(variable,value){
   return(looplotlabels[value])
 }
 
+
 ( looplot &lt;- ggplot( looplotdf ) +
             geom_segment( aes( x=cilow, y=studynames, xend=ciup, yend=studynames ) ) +
             geom_point( aes( x=est, y=studynames) ) +
@@ -978,6 +979,7 @@ yaxis.studytypelab &lt;- c(&#39;Observational: Naive estimates&#39;,
                         &#39;RCTs&#39;)
 yaxis.summarylab &lt;- c(&#39;Mean OR: All Studies&#39;,&#39;Mean OR: No naive estimates&#39;)
 
+#tiff( &#39;Fig4.tif&#39;, width = 8, units = &#39;in&#39;, height = 10, res = 300 )
 par( mar= c(6.2,16,1,12), xpd=T, oma=c( 0,0,0,0 ) ) 
 with( prophylplot1, plot( logor, yaxis.or, type = &#39;p&#39;, pch = 15, 
                          xlim = c( -3, 3 ), ylim =c( 0, max(yaxis.or)*1.1), 
@@ -1035,6 +1037,7 @@ with( prophylplot1, text( x=6.5, y = 15, labels = &#39;-0.14, 0.83&#39;, las = 2
 with( prophylplot1, text( x=-12, y = max(yaxis.or)+5, labels = &#39;RSV Immunoprophylaxis Studies&#39;, las = 2, font = 2, 
                           col = 1, cex = 1.5, xpd = T, pos=4 ) )</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-29-1.png" width="768" /></p>
+<pre class="r"><code>#dev.off()</code></pre>
 <p><strong>Model 2.4:</strong> Finally, we run a model including estimates from only the two immunoprophyalxis RCTs. As there were only two studies and seven estimates, we expect a large confidence interval around the weighted mean effect size estimate. The RCTs have a major advantage of essentially eliminating the threat of confounding by indication given that participant characteristics could not affect the likelihood of their receiving the intervention.</p>
 <pre class="r"><code>print( model2.4 &lt;- robu( logor ~ 1, 
                           data = whoprophyl[ whoprophyl$rct == &#39;RCT&#39;, ], 
