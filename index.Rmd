@@ -452,7 +452,7 @@ We intended to conduct a subgroup analysis evaluating the mean effect size for t
 
 
 ## *RSV immunoprophylaxis* studies
-In this section, we evaluate whether there is evidence that high-risk infants receiving RSV immunoprophylaxis have lower risk of subsequent wheezing illness. There are 8 *RSV immunoprophylaxis* studies (2 RCTs and 6 non-randomized studies) providing 22 estimates for the primary analyses. 
+In this section, we evaluate whether there is evidence that high-risk infants receiving RSV immunoprophylaxis have lower risk of subsequent wheezing illness. There are 8 *RSV immunoprophylaxis* studies (2 RCTs and 6 non-randomized studies) providing 24 estimates for the primary analyses. 
 
 First, we create a data frame with only RSV immunoprophylaxis Studies. There are 16 estimates from non-randomized prophylaxis studies and 8 from the two RCTs. 
 ```{r}
@@ -594,7 +594,7 @@ with( prophylplot1, text( x=-12, y = max(yaxis.or)+5, labels = 'RSV Immunoprophy
 
 
 
-**Model 2.4:** Finally, we run a model including estimates from only the two immunoprophyalxis RCTs. As there were only two studies and seven estimates, we expect a large confidence interval around the weighted mean effect size estimate. The RCTs have a major advantage of essentially eliminating the threat of confounding by indication given that participant characteristics could not affect the likelihood of their receiving the intervention. 
+**Model 2.4:** Finally, we run a model including estimates from only the two immunoprophyalxis RCTs. As there were only two studies and eight estimates, we expect a large confidence interval around the weighted mean effect size estimate. The RCTs have a major advantage of essentially eliminating the threat of confounding by indication given that participant characteristics could not affect the likelihood of their receiving the intervention. 
 ```{r}
 print( model2.4 <- robu( logor ~ 1, 
                           data = whoprophyl[ whoprophyl$rct == 'RCT', ], 
