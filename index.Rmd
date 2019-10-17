@@ -346,7 +346,7 @@ The modifying effect of controlling for genetic confounding (**minanygenf**) was
 <br>
 **Leave-One-Out Analyses:** Finally, we reran model 1.2 35 times, iteratively removing one study (and all of its estimates) at a time to determine whether any one study had enough influence to alter our main conclusions. The figure below shows estimates on the log~e~(OR) scale for the intercept (panel **a**) and the modifying influence of limiting genetic confounding (panel **b**). The x-axis shows the estimates on the log~e~OR scale when each individual study is dropped from model 1.2 one at a time. The y-axis shows which study was dropped from the analysis when calculating the estimates. The vertical red dotted line at 0 represents a null effect. 
 
-```{r, figure.height = 30, figure.width = 20}
+```{r, figure.height = 30, figure.width = 35}
 looplot_labeller <- function(variable,value){
   return(looplotlabels[value])
 }
@@ -355,7 +355,7 @@ looplotdf1 <- subset( looplotdf, parameter == 'Intercept' | parameter == 'minany
 looplotdf1$parameter <- factor( looplotdf1$parameter  )
 
 levels( looplotdf1$parameter) <- c( 'a.\nConditional Mean (Intercept)',
-                       'b.\nModifying Influence of Controlling for Genetic Confounding')
+                       'b.\nModifying Influence of Controlling\n for Genetic Confounding')
 
 looplotdf1$StudyInfluence <- factor( ifelse( looplotdf1$cilow <= 0, 0, 1 ), 
                                                 levels = 0:1, 
