@@ -372,7 +372,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Analytic Summary</h1>
-<h4 class="date">UPDATED October 17, 2019, 10:34</h4>
+<h4 class="date">UPDATED October 17, 2019, 12:42</h4>
 
 </div>
 
@@ -393,7 +393,7 @@ div.tocify {
 <li><strong>exp012f</strong>: Binary factor indicating whether the exposure ascertainment period was entirely contained within the first 12 months of life or whether it extended beyond 12 months</li>
 <li><strong>participantriskf</strong>: Binary factor indicating whether the study enrolled only individuals with a known risk factor for asthma (other than RSV-LRTI) or whether enrollment was not risk-based</li>
 <li><strong>minanygenf</strong>: Binary factor indicating whether or not the effect size estimate was based on an analysis that limited potential genetic confounding to any degree</li>
-<li><strong>minanycoinf</strong>: Binary factor indicating whether or not the effect size estimate was based on an analysis that limited potential confounding due to the presence of co-infections</li>
+<li><strong>minanycoinff</strong>: Binary factor indicating whether or not the effect size estimate was based on an analysis that limited potential confounding due to the presence of co-infections</li>
 <li><strong>minanyneof</strong>: Binary factor indicating whether or not the effect size estimate was based on an analysis that limited potential confounding due to differences in the exposed and comparator groups in markers of neonatal health (e.g., gestational age at birth)</li>
 <li><strong>rct</strong>: Binary factor distinguishing between <em>RSV immunoprophylaxis</em> studies using a randomized controlled design vs. a non-randomized design</li>
 <li><strong>Design</strong>: 3-level factor distinguishing between three study design types: <em>RSV-LRTI Medical Event</em>, <em>RSV-LRTI surveillance</em> studies, and <em>RSV immunorophylaxis</em> studies</li>
@@ -410,20 +410,18 @@ div.tocify {
 rm(list=ls())
 
 ## Load the primary data set
-whoprimary &lt;- read.csv( &#39;https://www.dropbox.com/s/ybre6b47l0jpj3z/whoprimary.csv?dl=1&#39; )
-## Load data for subgroup analyses
-whoatopy &lt;- read.csv( &#39;https://www.dropbox.com/s/xu3pssx56mzhg6g/whoatopy.csv?dl=1&#39;)
+whoprimary &lt;- read.csv( &#39;https://www.dropbox.com/s/awh4lq29zdtur8e/whoprimary2.csv?dl=1&#39; )
 ## Load data for plotting results from leave-one-out analyses
 looplotdf &lt;- read.csv( &#39;https://www.dropbox.com/s/4l9ki93tnhbdatf/looplotdf1.csv?dl=1&#39; )
 ## Load data for plotting RSV Immunoprophylaxis forest plot
-prophylplot1 &lt;- read.csv( &#39;https://www.dropbox.com/s/ryr9lojqeggi3bg/whoprophyl1.csv?dl=1&#39; )
+prophylplot1 &lt;- read.csv( &#39;https://www.dropbox.com/s/fee5hyeihk0nn3k/whoprophyl2.csv?dl=1&#39; )
 
 ## Load necessary packages
 library( robumeta );library( ggplot2 );library( qqplotr ); library( metafor ); library( clubSandwich );library( metaviz );library( psych );</code></pre>
 </div>
 <div id="preliminary-steps-and-data-visualization" class="section level1">
 <h1><span class="header-section-number">4</span> Preliminary steps and data visualization</h1>
-<p>First, we create an inverse standard error weight variable to show approximately how much weight each estimate would carry (i.e., how precise it is) for plotting (not analytic) purposes. The standard error for each log odds ratio effect size estimate is contained in the <strong>se_logor</strong> variable.</p>
+<p>First, we create an inverse standard error weight variable (<strong>w</strong>) showing approximately how much weight each estimate would carry (i.e., how precise it is) for plotting (not analytic) purposes. The standard error for each log odds ratio effect size estimate is contained in the <strong>se_logor</strong> variable.</p>
 <pre class="r"><code>whoprimary$w &lt;- whoprimary$se_logor^-1</code></pre>
 <p>Then we make a boxplot figure of the log odds ratio estimates by study design to get a sense of how the data are distributed. We’ll use the newly created inverse standard error variable to determine the size of the points in the plot, with point size increasing with the precision of the estimate.</p>
 <pre class="r"><code>( box1 &lt;- ggplot( whoprimary, aes( x=Design, y=logor ) ) +
@@ -460,12 +458,12 @@ library( robumeta );library( ggplot2 );library( qqplotr ); library( metafor ); l
 <h1><span class="header-section-number">5</span> Meta-Regression Analyses</h1>
 <div id="rsv-lrti-exposure-studies" class="section level2">
 <h2><span class="header-section-number">5.1</span> <em>RSV-LRTI exposure</em> studies</h2>
-<p>In this section, we evaluate whether there is evidence that confirmed RSV-LRTI is positively associated with subsequent wheezing illness in observational studies and whether effect modifiers representing potential non-causal explanations for this association account for heterogeneity in the effect size estimates. There are 35 <em>RSV Exposure</em> studies providing 129 estimates for the primary analyses. Note: One of the two RSV immunoprophylaxis RCTs provided an estimate of the direct association between RSV-LRTI and subsequent wheezing illness, and therefore contributed one estimate to the <em>RSV-LRTI exposure</em> analyses.</p>
+<p>In this section, we evaluate whether there is evidence that confirmed RSV-LRTI is positively associated with subsequent wheezing illness in observational RSV-LRTI exposure studies and whether effect modifiers representing potential non-causal explanations for this association account for heterogeneity in the effect estimates. There are 35 RSV-LRTI exposure studies providing 129 estimates for the primary analyses. Note: <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1211917">Blanken et al. 2013</a>, one of the two RSV immunoprophylaxis randomized controlled trials (RCTs), provided an estimate of the direct association between RSV-LRTI and subsequent wheezing illness, and therefore contributed one estimate to the RSV-LRTI exposure analyses.</p>
 <div id="unconditional-effect-model" class="section level3">
 <h3><span class="header-section-number">5.1.1</span> Unconditional effect model</h3>
 <p>Create a data frame (<strong>whorsvexp</strong>) with only RSV-LRTI exposure studies</p>
 <pre class="r"><code>whorsvexp &lt;- subset( whoprimary, rsvexp == &#39;RSV Exposure Studies&#39; )</code></pre>
-<p><strong>Model 1.0:</strong> Prior to running the <em>a priori</em> model, we first run a model with no effect modifiers to calculate the unconditional weighted mean log<sub>e</sub>OR (log<sub>e</sub>OR<sub>+</sub>). We use a simple working model of the within-study correlation matrix (set all within-study correlations to <span class="math inline">\(\rho\)</span> = 0.80) in order to get optimally efficient inverse variance weights. The <strong>studyid</strong> variable is identified as the clustering variable and small-sample-size corrections are applied <a href="https://www.ncbi.nlm.nih.gov/pubmed/24773356">(Tipton, 2015)</a>. The analysis provides traditional estimates of between-study heterogeniety (<span class="math inline">\(\tau\)</span><sup>2</sup> and I<sup>2</sup>), but the RVE approach deemphasizes the evaluation of between-study heterogeneity and focuses only on obtaining accurate standard errors for fixed-effects parameters. <span class="math inline">\(\tau\)</span><sup>2</sup> is calculated in RVE analyses only to allow for the calculation of optimally efficient weights <a href="https://link.springer.com/article/10.1007/s40865-016-0026-5">(Tanner-Smith et al. 2016)</a>. Therefore, although the <em>robumeta</em> package reports traditional between-study heterogeneity estimates, we do not focus on them.</p>
+<p><strong>Model 1.0:</strong> Prior to running the <em>a priori</em> model, we first run a model with no effect modifiers to calculate the unconditional weighted mean log<sub>e</sub>OR (log<sub>e</sub>OR<sub>+</sub>). We use a simple working model of the within-study correlation matrix (set all within-study correlations to <span class="math inline">\(\rho\)</span> = 0.80) in order to get optimally efficient inverse variance weights. The <strong>studyid</strong> variable is identified as the clustering variable and small-sample-size corrections are applied <a href="https://www.ncbi.nlm.nih.gov/pubmed/24773356">(Tipton, 2015)</a>. The analysis provides traditional estimates of between-study heterogeniety (<span class="math inline">\(\tau\)</span><sup>2</sup> and I<sup>2</sup>), but the RVE approach deemphasizes the evaluation of between-study heterogeneity and focuses on obtaining accurate standard errors for fixed-effects parameters. <span class="math inline">\(\tau\)</span><sup>2</sup> is calculated in RVE analyses only to allow for the calculation of optimally efficient weights <a href="https://link.springer.com/article/10.1007/s40865-016-0026-5">(Tanner-Smith et al. 2016)</a>. Therefore, although the <em>robumeta</em> package reports traditional between-study heterogeneity estimates, we do not focus on them.</p>
 <pre class="r"><code>model1.0 &lt;- robu( logor ~ 1, data = whorsvexp, studynum = studyid, var.eff.size = se_logor^2, rho = .8, small = T ) 
 print( model1.0 )</code></pre>
 <pre><code>## RVE: Correlated Effects Model with Small-Sample Corrections 
@@ -492,7 +490,7 @@ print( model1.0 )</code></pre>
 ## 1              3.39 2.72 4.24</code></pre>
 <p>In the unconditional model, RSV-LRTI exposure is associated with a 3.39-fold increase in odds of subsequent wheezing illness (95% CI: 2.72, 4.24).</p>
 <p><br></p>
-<p><strong>Model 1.0.1:</strong> It is plausible that the mean association between RSV-LRTI and wheezing illness observed in Model 1.0 is driven by transient wheezing illnesses whose manifestations are limited to the preschool years. To evaluate this possibility, we run a new model including only estimates evaluating the association between RSV-LRTI and subsequent “asthma” outcomes measured at age <span class="math inline">\(\ge\)</span> 6 years. Estimates were included if the study authors described the corresponding outcome variable as “asthma” as determined by medical records, physician evaluation, and/or a pre-specified study criteria (e.g., <span class="math inline">\(\ge\)</span> 3 wheezing episodes in the past year, use of asthma medications, etc.). This model focuses only on outcomes present at an age when early life transient wheezing episodes have typically resolved. Additionally, all estimates included in this model correspond to outcomes that were measured long after the washout period (30 days) between the exposure and outcome measurements. Thus, we can be highly confident that all wheezing illness outcomes included in this analysis were not merely symptom manifestations of the index RSV-LRTI illness (i.e., the exposure and outcome are clearly separate).</p>
+<p><strong>Model 1.0.1:</strong> It is plausible that the mean association between RSV-LRTI and wheezing illness observed in Model 1.0 is driven by transient wheezing illnesses whose manifestations are limited to the preschool years. To evaluate this possibility, we run a new model including only estimates evaluating the association between RSV-LRTI and subsequent “asthma” outcomes measured at age <span class="math inline">\(\ge\)</span> 6 years. Estimates were included if the study authors described the corresponding outcome variable as “asthma” as determined by medical records, physician evaluation, and/or a pre-specified study criteria (e.g., <span class="math inline">\(\ge\)</span> 3 wheezing episodes in the past year, use of asthma medications, etc.). This model focuses only on outcomes present at an age when early life transient wheezing episodes have typically resolved. Additionally, all estimates included in this model correspond to outcomes that were measured long after the washout period (&gt;30 days) between the exposure and outcome measurements. Thus, we can be highly confident that all wheezing illness outcomes included in this analysis were not merely symptom manifestations of the index RSV-LRTI illness (i.e., the exposure and outcome are clearly separate).</p>
 <p>First, we create a new dataframe (<em>whorsvesp_asth6</em>) including only estimates measuring asthma at age <span class="math inline">\(\ge\)</span> 6 years.</p>
 <pre class="r"><code>whorsvexp_asth6 &lt;- subset( whorsvexp, dxoutcome6 == 1 )</code></pre>
 <p>Next, we re-run <strong>Model 1.0</strong> in the new data frame containing only estimates measuring asthma at age <span class="math inline">\(\ge\)</span> 6 years.</p>
@@ -527,8 +525,8 @@ model1.0.1.uci &lt;- round( exp( c(model1.0.1$reg_table$CI.U[1]) ), digits = 2  
 ( model1.0.1.table &lt;- data.frame(parameter=model1.0.1$reg_table$labels[1], ConditionalOddsRatio=model1.0.1.est[1], LCI=model1.0.1.lci[1], UCI=model1.0.1.uci[1] ) )</code></pre>
 <pre><code>##      parameter ConditionalOddsRatio  LCI  UCI
 ## 1 X.Intercept.                 2.64 1.75 3.98</code></pre>
-<p>The weighted mean effect size from Model 1.0.1 is smaller than the estimate from Model 1.0, but remains positive and significant: OR<sub>+</sub> = 2.64, 95% CI [1.75, 3.98]. Thus, the effect of RSV-LRTI on subsequent wheezing illness does not appear to be driven by estimates evaluating effects of RSV-LRTI on transient wheezing episodes in early life.</p>
-<p><br> <br></p>
+<p>The weighted mean odds ratio from Model 1.0.1 is smaller than the estimate from Model 1.0, but remains positive and significant: OR<sub>+</sub> = 2.64, 95% CI [1.75, 3.98]. Thus, the effect of RSV-LRTI on subsequent wheezing illness does not appear to be driven by estimates evaluating effects of RSV-LRTI on transient wheezing episodes in early life.</p>
+<p><br></p>
 </div>
 <div id="primary-a-priori-model" class="section level3">
 <h3><span class="header-section-number">5.1.2</span> Primary (<em>a priori</em>) model</h3>
@@ -541,12 +539,10 @@ model1.0.1.uci &lt;- round( exp( c(model1.0.1$reg_table$CI.U[1]) ), digits = 2  
 <li><strong>x<sub>3</sub><sup>ij</sup></strong> = genetic confounding: 0=no clear attempt to control potential genetic confounding; 1=confounding controlled at least somewhat</li>
 <li><strong>x<sub>4</sub><sup>ij</sup></strong> = co-infection confounding: 0=no attempt to control potential confounding due to co-infections at time of RSV+ LRTI ascertainment; 1= confounding controlled at least somewhat</li>
 <li><strong>x<sub>5</sub><sup>ij</sup></strong> = neonatal health confounding: 0=no attempt to control potential confounding due to infant neonatal health; 1= confounding controlled at least somewhat</li>
-<li><strong>w<sub>1</sub><sup>j</sup></strong> = participant risk: 0=study included children regardless of risk status; 1=study included only children at risk for wheezing illness beyond having an LRTI;</li>
+<li><strong>w<sub>1</sub><sup>j</sup></strong> = participant risk: 0=study included children regardless of risk status; 1=study included only children at risk for wheezing illness beyond having an LRTI</li>
 <li><strong>w<sub>2</sub><sup>j</sup></strong> = exposure ascertainment period: 0=study exposure ascertainment extends beyond 12 months of age; 1= exposure ascertainment entirely within the first 12 months of life.</li>
-<li><strong>e<sup>ij</sup></strong> = within-study sampling error;</li>
-<li><strong>u<sup>j</sup></strong> = between-study deviations from the population average effect size</li>
 </ul>
-<p>Prior to conducting our Robust Variance Estimation (RVE) meta-regression, it is critical to evaluate the distributions of the potential effect modifiers (covariates in the above equation). Our RVE models calculate degrees of freeedom (<em>df</em>) using Satterthwaite approximation. Estimates with <em>df</em> &lt; 4 should not be trusted <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=tipton+2015+robust+variance+estimation">(Tipton, 2015)</a>. Imbalance and sparse cells in the covariates could be a cause of insufficient <em>df</em>.</p>
+<p>Prior to conducting our robust variance estimation (RVE) meta-regression, it is critical to evaluate the distributions of the potential effect modifiers (covariates in the above equation). Our RVE models calculate degrees of freeedom (<em>df</em>) using Satterthwaite approximation. Estimates with <em>df</em> &lt; 4 should not be trusted <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=tipton+2015+robust+variance+estimation">(Tipton, 2015)</a>. Imbalance and sparse cells in the covariates could be a cause of insufficient <em>df</em>.</p>
 <p>There is notable imbalance in the variables coding age category at outcome ascertainment (i.e., relatively few estimates measured in Adolescence/Adulthood) and control of confouding due to co-infection (i.e., few studies minimized this potential confounder). We will run the <em>a priori</em> model as is and note whether the <em>df</em> indicate a problem.</p>
 <pre class="r"><code>( toutagecat2 &lt;- with( whorsvexp, table( outagecat2f ) ) )</code></pre>
 <pre><code>## outagecat2f
@@ -562,7 +558,7 @@ barplot( toutagecat2, main = &#39;Age Category at Outcome Measurement&#39; )</co
 <pre class="r"><code>barplot( tminanycoinf, main = &#39;Any Evidence Co-Infection Confounding Reduced&#39; )</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
 <p><br> <br></p>
-<p><strong>Model 1.1:</strong> We run the <em>a priori</em> model for <em>RSV-LRTI Exposure</em> studies. First, we set the reference level for all effect modifiers to their modal values. Consequently, the intercept represents the conditional mean effect size estimate when all effect modifiers are held at their most common value.</p>
+<p><strong>Model 1.1:</strong> We run the <em>a priori</em> model for RSV-LRTI exposure studies. First, we set the reference level for all effect modifiers to their modal values. Consequently, the intercept represents the conditional mean odds ratio estimate when all effect modifiers are held at their most common value (aOR<sub>+</sub>).</p>
 <pre class="r"><code>## Set reference levels for all effect modifiers to the modal factor category
 whorsvexp$outagecat2f &lt;- relevel( whorsvexp$outagecat2f, ref = &#39;Preschool&#39; )
 whorsvexp$minanycoinff &lt;- relevel( whorsvexp$minanycoinff, ref = &#39;Not limited&#39; )
@@ -596,7 +592,7 @@ model1.1 &lt;- robu( logor ~ surveilf*outagecat2f + surveilf*exp012f + minanygen
 ## 11    surveilfSurveil.outagecat2fSchool.Age    -0.04   0.32  4.99    -0.85     0.78
 ## 12  surveilfSurveil.exp012fBeyond.12.months     0.17   0.32  4.44    -0.68     1.02</code></pre>
 <p>The <em>df</em> for the estimate of the effect modifier coding age category at outcome ascertainment (<strong>outagecat2f</strong>) and comparing effect sizes measured in adolescence/adulthood to estimates measured in preschool are too small to be trusted (<em>df</em>=1.91). This may be due to the fact that there is high imbalance across the levels of this factor, with few estimates measuring effects in adolescence/adulthood. Additionally, the effect modifier coding whether effect sizes were adjusted for non-RSV co-infections (<strong>minanycoinff</strong>) also had <em>df</em> &lt; 4. The likely consequence is that the confidence interval around the <strong>minanycoinf</strong> estimate is too narrow <a href="https://www.ncbi.nlm.nih.gov/pubmed/24773356">(Tipton, 2015)</a>. As the confidence interval for <strong>minanycoinf</strong> easily contains 0 (the null value) and is likely too narrow, we can clearly not reject the null hypothesis.</p>
-<p><strong>Model 1.2:</strong> We rerun Model 1.1 after collapsing the school age and adolescence/adulthood categories for the outcome age variable. It is now a binary variable called <em>preschool</em>. This effect modifier now compares effect size esitmates measured during the preschool years to estimates measured outside of the preschool years: preschool vs. schoolage/adolescence/adulthood. This may fix the df problem. Additionally, we dropped the two interaction terms as there was no evidence that they were significant and they had relatively small <em>df</em>. Because the <strong>minanycoinf</strong> effect modifier tests an <i> a priori </i> hypothesis, we retained it in our model even though it has <em>df</em> &lt; 4.</p>
+<p><strong>Model 1.2:</strong> We rerun Model 1.1 after collapsing the school age and adolescence/adulthood categories for the outcome age variable. It is now a binary variable called <strong>preschoolf</strong>. This effect modifier now compares effect size esitmates measured during the preschool years to estimates measured outside of the preschool years: preschool vs. schoolage/adolescence/adulthood. This may fix the df problem. Additionally, we dropped the two interaction terms as there was no evidence that they were significant and they had relatively small <em>df</em>. Because the <strong>minanycoinf</strong> effect modifier tests an <i> a priori </i> hypothesis, we retained it in our model even though it has <em>df</em> &lt; 4.</p>
 <pre class="r"><code>( model1.2 &lt;- robu( logor ~ surveilf + preschoolf + exp012f + minanygenf + minanycoinff + minanyneof + participantriskf, 
                   data = whorsvexp, 
                   studynum = studyid, 
@@ -637,7 +633,7 @@ model1.2.uci &lt;- round( exp( c(model1.2$reg_table$CI.U[1]) ), digits = 2  )
 ## 1 X.Intercept.                  2.45 1.23 4.88</code></pre>
 <p>The adjusted (conditional) weighted mean OR = 2.45 (95% CI: 1.23, 4.88) when holding all effect modifiers at their modal levels.</p>
 <p>Effect estimates were larger among studies that did not control genetic confounding: <span class="math inline">\(\hat\gamma\)</span>=0.53, 95% CI [0.04, 1.02]. This is consistent with the hypothesis that RSV-LRTI exposure is at least partly a marker of genetic susceptibility rather than a strictly causal factor. There was no evidence of effect modification by whether estimates were based on analyses controlling for non-RSV co-infections or neonatal health markers. Although these effect modifiers did not represent primary hypotheses, estimates from studies using a targeted enrollment strategy (i.e., enrolling only those with a known risk factor for wheezing illness other than RSV-LRTI exposure: <strong>participantriskf</strong>) and those in which the exposure ascertainment period was not entirely limited to the first 12 months of life (<strong>exp012f</strong>) yielded smaller effect sizes.</p>
-<p><strong>Model 1.3:</strong> To gauge how much smaller the expected weighted mean effect size is among estimates that controlled for genetic confounding, we reran Model 1.2 changing the reference level of the <strong>minanygenf</strong> variable so that <strong>not</strong> controlling for genetic confounding was the reference category and controlling genetic confounding at least somewhat was the comparison level. The intercept in this model represents the log<sub>e</sub>OR<sub>+</sub> estimate among studies that did not control genetic confounding, holding all other effect modifiers at their modal categories.</p>
+<p><strong>Model 1.3:</strong> To gauge how much smaller the expected weighted mean effect estimate when controlling for genetic confounding, we reran Model 1.2 changing the reference level of the <strong>minanygenf</strong> variable so that <em>not</em> controlling for genetic confounding was the reference category and controlling genetic confounding <em>at least somewhat</em> was the comparison level. The intercept in this model represents the log<sub>e</sub>OR<sub>+</sub> estimate among studies that did not control genetic confounding, holding all other effect modifiers at their modal categories.</p>
 <pre class="r"><code>## Create a new factor for the genetic confounding effect modifier with &quot;Not controlled&quot; as the reference level
 whorsvexp$minanygenrev &lt;- factor(whorsvexp$minanygen,levels=0:1,labels=c(&#39;Not controlled&#39;,&#39;Controlled&#39;))
   
@@ -681,7 +677,7 @@ model1.3.uci &lt;- round( exp( c(model1.3$reg_table$CI.U[1]) ), digits = 2  )
 <pre><code>##      parameter ConditionalOddsRatio  LCI  UCI
 ## 1 X.Intercept.                 4.17 2.36 7.37</code></pre>
 <p>The intercept in Model 1.3 is considerably larger when it represents the log<sub>e</sub>OR<sub>+</sub> among studies not controlling for genetic confounding compared to Model 1.2 when it represents studies that did control fo genetic confounding. The point estimate for the intercept increases from aOR<sub>+</sub>=2.45 in Model 1.2 to aOR<sub>+</sub>=4.17 in Model 1.3. The intercept is positive and signifcant in both models, indicating a positive conditional mean effect of RSV-LRTI on subsequent wheezing illness. But we expect a substantial drop in the weighted mean adjusted odds ratio (aOR<sub>+</sub>) for the effect of RSV-LRTI on subsequent wheezing illness when studies do something to control for genetic confounding.</p>
-<p>Below we visualize the modifying effect of controlling for genetic confounding at least somewhat by plotting boxplots for the observared effect size estimates by whether or not the estimates controlled for genetic confounding. We superimpose the point estimates to show the observed distributions with the point size proportional to the estimate’s inverse variance – i.e., more precise estimates have larger points. Additionally, we superimpose red diamonds, the center of which represents the log<sub>e</sub>OR<sub>+</sub> estimates based on models 1.2 and 1.3. The bottoms and tops of the diamonds represent, respectively, the lower and upper bound 95% confidence intervals. Finally, we highlight with a blue triangle the estimate from the study by <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=poorisrisak+twin+rsv+asthma">Poorisrisak et al. 2010</a> because this was the only estimate that eliminated genetic confounding by comparing monozygotic twins who were discordant for RSV-LRTI hospitalization. This point estimate was smaller than 88% (67/76) of the estimates that only partly controlled for genetic confounding. As the sample size was relatively small in this study, there was considerable uncertainty in this estimate with plausible ORs ranging from RSV-LRTI hospitalization being protective (lower 95% CI = 0.36) to highly damaging (upper 95% CI = 4.00).</p>
+<p>Below we visualize the modifying effect of controlling for genetic confounding at least somewhat by plotting boxplots for the observared effect size estimates by whether or not the estimates controlled for genetic confounding. We superimpose the point estimates to show the observed distributions with the point size proportional to the estimate’s inverse variance (i.e., more precise estimates have larger points). Additionally, we superimpose red diamonds, the center of which represents the log<sub>e</sub>OR<sub>+</sub> estimates based on models 1.2 and 1.3. The bottoms and tops of the diamonds represent, respectively, the lower and upper bound 95% confidence intervals. Finally, we highlight with a red triangle the estimate from the study by <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=poorisrisak+twin+rsv+asthma">Poorisrisak et al. 2010</a> because this was the only estimate that eliminated genetic confounding by comparing monozygotic twins who were discordant for RSV-LRTI hospitalization. This point estimate was smaller than 88% (67/76) of the estimates that only partly controlled for genetic confounding. As the sample size was relatively small in this study, there was considerable uncertainty in this estimate with plausible estimates ranging from RSV-LRTI hospitalization being protective (lower 95% CI = 0.36) to highly damaging (upper 95% CI = 4.00).</p>
 <pre class="r"><code>whorsvexp$minanygenplot &lt;- factor( whorsvexp$minanygen, levels = 0:1, labels=c(&#39;Not at all&#39;, &#39;At least somewhat&#39;) )
 mingenfull &lt;- with( whorsvexp, ifelse( studyname == &#39;Poorisrisak 2010&#39;, 1, 0 ) )#
 mingenfullf &lt;- factor( mingenfull, levels=0:1, labels=c(&#39;Not fully minimized&#39;,&#39;Fully minimized&#39; ) ) 
@@ -733,7 +729,7 @@ df2 &lt;- data.frame(x2,y2)
 </div>
 <div id="sensitivity-analyses-for-rsv-exposure-studies" class="section level3">
 <h3><span class="header-section-number">5.1.3</span> Sensitivity Analyses for RSV+ Exposure Studies</h3>
-<p><strong>Model 1.4:</strong> We run a sensitivity analysis for Model 1.2 using different values for the presumed common correlation among effect sizes from the same study (<span class="math inline">\(\rho\)</span>). We’ll rerun the model 5 times with the value of <span class="math inline">\(\rho\)</span> taking on values ranging from 0.00 to 1.00 (full range of possible correlations) at an interval of 0.20. Then we can see if the model estimates and standard errors are sensitive to our choice of value for <span class="math inline">\(\rho\)</span>.</p>
+<p><strong>Model 1.4:</strong> We run a sensitivity analysis for Model 1.2 using different values for the presumed common correlation among effect sizes from the same study (<span class="math inline">\(\rho\)</span>). We’ll rerun the model five times with the value of <span class="math inline">\(\rho\)</span> taking on values ranging from 0.00 to 1.00 (full range of possible correlations) at an interval of 0.20. Then we can see if the model estimates and standard errors are sensitive to our choice of value for <span class="math inline">\(\rho\)</span>.</p>
 <pre class="r"><code>sensitivity( model1.2 )</code></pre>
 <pre><code>## RVE: Correlated Effects Model with Small-Sample Corrections 
 ## Model: logor ~ surveilf + preschoolf + exp012f + minanygenf + minanycoinff + minanyneof + participantriskf 
@@ -791,8 +787,8 @@ print( model1.5 )</code></pre>
 ## Signif. codes: &lt; .01 *** &lt; .05 ** &lt; .10 *
 ## ---
 ## Note: If df &lt; 4, do not trust the results</code></pre>
-<p>The modifying effect of controlling for genetic confounding was robust when removing naive estimates and the intercept (conditional weighted mean log<sub>e</sub>OR) remained positive and significant. Confidence intervals for the other effect modifiers of primary interest (<em>minanyconinff</em> and <em>minanyneof</em>) still overlap the null. Thus, removing naive estimates did not alter our conclusions.</p>
-<p><br> <strong>Leave-One-Out Analyses:</strong> Finally, we reran model 1.2 35 times, iteratively removing one study (and all of its estimates) at a time to determine whether any one study had enough influence to alter our main conclusions. The figure below shows estimates on the log<sub>e</sub>(OR) scale for the intercept (panel <strong>a</strong>) and the modifying influence of limiting genetic confounding (panel <strong>b</strong>). The x-axis shows the estimates on the log<sub>e</sub>OR scale when each individual study is eliminated from the model 1.2 (y-axis). The vertical red dotted line at 0 represents a null effect.</p>
+<p>The modifying effect of controlling for genetic confounding (<strong>minanygenf</strong>) was robust when removing naive estimates and the intercept (conditional weighted mean log<sub>e</sub>OR) remained positive and significant. Confidence intervals for the other effect modifiers of primary interest (<strong>minanyconinff</strong> and <strong>minanyneof</strong>) still overlap the null. Thus, removing naive estimates did not alter our conclusions.</p>
+<p><br> <strong>Leave-One-Out Analyses:</strong> Finally, we reran model 1.2 35 times, iteratively removing one study (and all of its estimates) at a time to determine whether any one study had enough influence to alter our main conclusions. The figure below shows estimates on the log<sub>e</sub>(OR) scale for the intercept (panel <strong>a</strong>) and the modifying influence of limiting genetic confounding (panel <strong>b</strong>). The x-axis shows the estimates on the log<sub>e</sub>OR scale when each individual study is dropped from model 1.2 one at a time. The y-axis shows which study was dropped from the analysis when calculating the estimates. The vertical red dotted line at 0 represents a null effect.</p>
 <pre class="r"><code>looplot_labeller &lt;- function(variable,value){
   return(looplotlabels[value])
 }
@@ -803,15 +799,15 @@ looplotdf1$parameter &lt;- factor( looplotdf1$parameter  )
 levels( looplotdf1$parameter) &lt;- c( &#39;a.\nConditional Mean (Intercept)&#39;,
                        &#39;b.\nModifying Influence of Controlling for Genetic Confounding&#39;)
 
-summary( looplotdf1$StudyInfluence &lt;- factor( ifelse( looplotdf1$cilow &lt;= 0, 0, 1 ), 
+looplotdf1$StudyInfluence &lt;- factor( ifelse( looplotdf1$cilow &lt;= 0, 0, 1 ), 
                                                 levels = 0:1, 
                                                 labels = c(&#39;Influential Study&#39;,&#39;Non-Influential Study&#39; ) )
-)</code></pre>
-<pre><code>##     Influential Study Non-Influential Study 
-##                     8                    62</code></pre>
-<pre class="r"><code>looplotdf1 &lt;- looplotdf1[ order(looplotdf1$StudyInfluence ), ]
 
-tiff( &#39;FigE1.tif&#39;, width = 10, units = &#39;in&#39;, height = 6, res = 300 )
+
+
+looplotdf1 &lt;- looplotdf1[ order(looplotdf1$StudyInfluence ), ]
+
+#tiff( &#39;FigE1.tif&#39;, width = 10, units = &#39;in&#39;, height = 6, res = 300 )
 ( looplot &lt;- ggplot( looplotdf1 ) +
             geom_point( size = 1.2, aes( x=est, y=studynames, shape = StudyInfluence ) ) +
             geom_segment( aes( x=cilow, y=studynames, xend=ciup, yend=studynames ) ) +
@@ -828,25 +824,25 @@ tiff( &#39;FigE1.tif&#39;, width = 10, units = &#39;in&#39;, height = 6, res = 3
               axis.text.x = element_text( size=6, face=&#39;bold&#39;),
               axis.text.y = element_text( size=6, face = &#39;bold&#39;),
               strip.text.x = element_text(size=8, face=&#39;bold&#39;) ) 
-)
-dev.off()</code></pre>
-<pre><code>## png 
-##   2</code></pre>
-<p><em>Panel a</em> shows that no matter which study (and all of its effect estimates) are removed from the model the confidence interval for the intercept estimate (i.e., the mean log<sub>e</sub>OR when all effect modifiers are held at their modal levels) does not contain the null value of 0. That is, there are no studies that are influential enough that their removal from the analysis would alter our conclusion about whether the intercept is greater than 0. However, <em>panel b</em> shows that there are eight studies (Kusel 2007; Stensballe 2018; Palmer 2011; Blanken 2016; Palmer 2010; Juntti 2003; Stensballe 2009; Broughton 2007) whose removal would cause the confidence interval for the modifying effect of controlling for genetic confouding to overlap 0 – i.e., removing these studies (and all of their estimates) would nullify the finding that analyses adjusting for genetic confounding yield smaller effect estimates. This does not invalidate the modifying effect of controlling for genetics – we still prefer the estimate with all studies included – but simply indicates that the effect is <strong>not</strong> so robust that removing any given study would have no bearing on our conclusions. It is also important to note that all but one of the studies controlling for genetic confounding, <a href="https://www.sciencedirect.com/science/article/abs/pii/S0012369210604151">Poorisrisak et al., 2010</a>, used imperfect proxy measures (e.g., parental history of asthma) that only partly capture genetic risk. Thus, it is likely that our models underestimate the modifying effect of controlling for genetic confounding.</p>
+)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>#dev.off()</code></pre>
+<p><em>Panel a</em> shows that no matter which study (and all of its effect estimates) are removed from the model the confidence interval for the intercept estimate (i.e., the mean log<sub>e</sub>OR when all effect modifiers are held at their modal levels) does not contain the null value of 0. That is, there are no studies that are influential enough that their removal from the analysis would alter our conclusion about whether the intercept is greater than 0.</p>
+<p>However, <em>panel b</em> shows that there are eight studies (Kusel 2007; Stensballe 2018; Palmer 2011; Blanken 2016; Palmer 2010; Juntti 2003; Stensballe 2009; Broughton 2007) whose removal would cause the confidence interval for the modifying effect of controlling for genetic confouding to overlap 0 – i.e., removing these studies (and all of their estimates) would nullify the finding that analyses adjusting for genetic confounding yield smaller effect estimates. This does not invalidate the modifying effect of controlling for genetics – we still prefer the estimate with all studies included – but simply indicates that the effect is <strong>not</strong> so robust that removing any given study would have no bearing on our conclusions. It is also important to note that all but one of the studies controlling for genetic confounding, <a href="https://www.sciencedirect.com/science/article/abs/pii/S0012369210604151">Poorisrisak et al., 2010</a>, used imperfect proxy measures (e.g., parental history of asthma) that only partly capture genetic risk. Thus, it is likely that our models underestimate the modifying effect of controlling for genetic confounding.</p>
 <p><br> <br></p>
 </div>
 </div>
 <div id="rsv-immunoprophylaxis-studies" class="section level2">
 <h2><span class="header-section-number">5.2</span> <em>RSV immunoprophylaxis</em> studies</h2>
-<p>In this section, we evaluate whether there is evidence that high-risk infants receiving RSV immunoprophylaxis have lower risk of subsequent wheezing illness. There are 8 <em>RSV immunoprophylaxis</em> studies (2 RCTs and 6 non-randomized studies) providing 24 estimates for the primary analyses.</p>
-<p>First, we create a data frame with only RSV immunoprophylaxis Studies. There are 16 estimates from non-randomized prophylaxis studies and 8 from the two RCTs.</p>
+<p>In this section, we evaluate whether there is evidence that high-risk infants receiving RSV immunoprophylaxis have reduced risk of subsequent wheezing illness. There are eight <em>RSV immunoprophylaxis</em> studies (2 RCTs and 6 non-randomized studies) providing 24 estimates for the primary analyses.</p>
+<p>First, we create a data frame with only RSV immunoprophylaxis Studies. There are 16 estimates from non-randomized prophylaxis studies and eight from the two RCTs.</p>
 <pre class="r"><code>whoprophyl &lt;- subset( whoprimary, comptype == &#39;Prophylaxis vs No Prophylaxis&#39; )
 whoprophyl$rct &lt;- factor( whoprophyl$rct, level=0:1, labels = c(&#39;Non-Randomized&#39;,&#39;RCT&#39;))
 table( whoprophyl$rct )</code></pre>
 <pre><code>## 
 ## Non-Randomized            RCT 
 ##             16              8</code></pre>
-<p><strong>Model 2.1:</strong> We run a model evaluating the weighted mean average effect size across all <em>RSV Prophylaxis</em> studies. One effect modifier, coding whether the study used an RCT or a non-randomized study design, was included in the model.</p>
+<p><strong>Model 2.1:</strong> We run a model evaluating the weighted mean average effect size across all RSV immunoprophylaxis studies. One effect modifier, coding whether the study used an RCT or a non-randomized study design, was included in the model.</p>
 <pre class="r"><code>print( model2.1 &lt;- robu( logor ~ rct, 
                           data = whoprophyl, 
                           studynum = studyid, var.eff.size = se_logor^2, rho = .8, small = T ) )</code></pre>
@@ -895,8 +891,8 @@ model2.2.uci &lt;- round( exp( c(model2.2$reg_table$CI.U[1]) ), digits = 2  )
 ( model2.2.table &lt;- data.frame(parameter=model2.2$reg_table$labels[1], OddsRatio=model2.2.est[1], LCI=model2.2.lci[1], UCI=model2.2.uci[1] ) )</code></pre>
 <pre><code>##      parameter OddsRatio  LCI  UCI
 ## 1 X.Intercept.      1.21 0.74 1.99</code></pre>
-<p>The estimate is positive, log<sub>e</sub>(OR)=0.19 (OR=1.21), but the confidence interval easily overlaps 0, so we <strong>cannot</strong> be confident that those not receiving RSV prophylaxis (who presumably have greater risk/severity of RSV-LRTI) are at any greater odds of having subsequent wheezing illness.</p>
-<p><strong>Model 2.3:</strong> One of the primary threats to inference in non-randomized prophylaxis trials is that those receiving RSV immunoprophylaxis have more severe health problems and are thus more likely to receive the intervention (<a href="https://www.sciencedirect.com/science/article/pii/S0091674916300963">Carroll et al 2017</a>). Thus, there is high risk of confounding by indication. As a sensitivity analysis, we reran Model 2.2 after removing two studies in which there was no clear attempt to minmize confounding by indication: <a href="https://www.ncbi.nlm.nih.gov/pubmed/30031764">dos Santos Simoes et al. 2018</a> and <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=Short-+and+Long-term+Pulmonary+Outcome+of+Palivizumab+in+Children+Born+Extremely+Prematurely">Prais et al. 2016</a>.</p>
+<p>The estimate is positive, log<sub>e</sub>OR<sub>+</sub>=0.19 (OR<sub>+</sub>=1.21), but the confidence interval easily overlaps 0, so we <strong>cannot</strong> be confident that those not receiving RSV prophylaxis (who presumably have greater risk/severity of RSV-LRTI) are at any greater odds of having subsequent wheezing illness.</p>
+<p><strong>Model 2.3:</strong> One of the primary threats to inference in non-randomized prophylaxis trials is confounding by indication: those receiving RSV immunoprophylaxis have more severe health problems and are thus more likely to receive the intervention (<a href="https://www.sciencedirect.com/science/article/pii/S0091674916300963">Carroll et al 2017</a>). As a sensitivity analysis, we reran Model 2.2 after removing two studies in which there was no clear attempt to minmize confounding by indication: <a href="https://www.ncbi.nlm.nih.gov/pubmed/30031764">dos Santos Simoes et al. 2018</a> and <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=Short-+and+Long-term+Pulmonary+Outcome+of+Palivizumab+in+Children+Born+Extremely+Prematurely">Prais et al. 2016</a>.</p>
 <pre class="r"><code>whoprophylsubset &lt;- subset( whoprophyl, studyname != &#39;Prais 2016&#39; &amp; studyname != &#39;dos Santos Simoes 2018&#39; )
 
 print( model2.3 &lt;- robu( logor ~ 1, 
@@ -925,12 +921,12 @@ model2.3.uci &lt;- round( exp( c(model2.3$reg_table$CI.U[1]) ), digits = 2  )
 ( model2.3.table &lt;- data.frame(parameter=model2.3$reg_table$labels[1], OddsRatio=model2.3.est[1], LCI=model2.3.lci[1], UCI=model2.3.uci[1] ) )</code></pre>
 <pre><code>##      parameter OddsRatio  LCI  UCI
 ## 1 X.Intercept.      1.38 0.85 2.24</code></pre>
-<p>The weighted mean effect size is larger when removing the two studies that did not reduce risk of confounding by indication, but the confidence interval still overlaps 0. Therefore, we cannot conclude with confidence that those receiving RSV immunoprophylaxis have lower odds of developing subsequent wheezing illness.</p>
-<p>Below is a forest plot summarizing results of models 2.2 and 2.3, evaluating the effect of RSV immunoprophylaxis on wheezing illness. Black squares with lines through them represent individual effect size estimates and their 95% confidence intervals, with the size of the squares proportional to their weight in the analysis. The blue diamond represents the weighted mean effect size and 95% confidence interval for estimates from RCTs and observational studies clearly limiting confounders (i.e., the mean effect size without naive estimates). The red diamond represents the weighted mean effect including all studies, including those from observational studies that did not clearly limit potential confounders. The vertical dotted line represents a null effect size: log<sub>e</sub>OR = 0.</p>
+<p>The weighted mean effect is larger when removing the two studies that did not reduce risk of confounding by indication, but the confidence interval still overlaps 0. Therefore, there is insufficient evidence that those receiving RSV immunoprophylaxis have lower odds of developing subsequent wheezing illness.</p>
+<p>Below is a forest plot summarizing results of models 2.2 and 2.3, evaluating the effect of RSV immunoprophylaxis on wheezing illness. Black squares with lines through them represent individual effect estimates and their 95% confidence intervals, with the size of the squares proportional to their weight in the analysis. The blue diamond represents the weighted mean effect size and 95% confidence interval for estimates from RCTs and observational studies clearly limiting confounders (i.e., the mean effect size without naive estimates). The red diamond represents the weighted mean effect from all studies, including those from observational studies that did not clearly limit potential confounders. The vertical dotted line represents a null effect size: log<sub>e</sub>OR<sub>+</sub> = 0.</p>
 <pre class="r"><code>yaxis.or &lt;- c(4:6,9,17:19,22:24,27:28,31:34,39:43,46:48) 
 yaxis.studylab &lt;- c(7,10,20,25,29,35,44,49)
 
-tiff( &#39;Fig4.tif&#39;, width = 8, units = &#39;in&#39;, height = 10, res = 300 )
+#tiff( &#39;Fig4.tif&#39;, width = 8, units = &#39;in&#39;, height = 10, res = 300 )
 par( mar= c(6.2,18.5,1,11), xpd=T, oma=c( 0,0,0,0 ) ) 
 with( prophylplot1, plot( logor, yaxis.or, type = &#39;p&#39;, pch = 15, 
                          xlim = c( -3, 3 ), ylim =c( 0, max(yaxis.or)*1.1), 
@@ -989,11 +985,10 @@ with( prophylplot1, text( x=6.65, y = 14, labels = paste( round(model2.3$reg_tab
                           las = 2, font = 2, col = &#39;dodgerblue&#39;, cex = .9, xpd = T ) )
 ## Main title
 with( prophylplot1, text( x=-14.5, y = max(yaxis.or)+5, labels = &#39;RSV Immunoprophylaxis Studies&#39;, las = 2, font = 2, 
-                          col = 1, cex = 1.5, xpd = T, pos=4 ) )
-dev.off()</code></pre>
-<pre><code>## png 
-##   2</code></pre>
-<p><strong>Model 2.4:</strong> Finally, we run a model including estimates from only the two immunoprophyalxis RCTs. As there were only two studies and eight estimates, we expect a large confidence interval around the weighted mean effect size estimate. The RCTs have a major advantage of essentially eliminating the threat of confounding-by-indication given that participant characteristics could not affect the likelihood of their receiving the intervention.</p>
+                          col = 1, cex = 1.5, xpd = T, pos=4 ) )</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-24-1.png" width="768" /></p>
+<pre class="r"><code>#dev.off()</code></pre>
+<p><strong>Model 2.4:</strong> Finally, we run a model including estimates from only the two immunoprophyalxis RCTs. As there were only two studies and eight estimates, we expect a large confidence interval around the weighted mean effect estimate. The RCTs have a major advantage of essentially eliminating the threat of confounding-by-indication given that participant characteristics could not affect the likelihood of their receiving the intervention.</p>
 <pre class="r"><code>print( model2.4 &lt;- robu( logor ~ 1, 
                           data = whoprophyl[ whoprophyl$rct == &#39;RCT&#39;, ], 
                           studynum = studyid, var.eff.size = se_logor^2, rho = .8, small = T ) )</code></pre>
@@ -1020,8 +1015,8 @@ model2.4.uci &lt;- round( exp( c(model2.4$reg_table$CI.U[1]) ), digits = 2  )
 ( model2.4.table &lt;- data.frame(parameter=model2.4$reg_table$labels[1], ConditionalOddsRatio=model2.4.est[1], LCI=model2.4.lci[1], UCI=model2.4.uci[1] ) )</code></pre>
 <pre><code>##      parameter ConditionalOddsRatio  LCI   UCI
 ## 1 X.Intercept.                 1.24 0.04 36.27</code></pre>
-<p>As expected, the confidence interval is very large, spanning OR values from 0.04 to 38.95. So we cannot rule out that getting a placebo instead of RSV immunoprophylaxis has a protective effect or a highly damaging effect.</p>
-<p>In sum, our analyses provide no evidence that high-risk infants <strong>not receiving RSV immunoprophylaxis</strong> are at any greater odds of developing subsequent wheeze than their counterparts who receive RSV immunoprophylaxis.</p>
+<p>As expected, the confidence interval is very large, spanning OR values from 0.04 to 38.95. Consequently, we cannot rule out that getting a placebo instead of RSV immunoprophylaxis has either a strong protective effect or a highly damaging effect.</p>
+<p>In sum, our analyses provide insufficient evidence that high-risk infants <strong>not receiving RSV immunoprophylaxis</strong> are at any greater odds of developing subsequent wheeze than their counterparts who receive RSV immunoprophylaxis.</p>
 </div>
 </div>
 
