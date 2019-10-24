@@ -552,6 +552,6 @@ model2.4.uci <- round( exp( c(model2.4$reg_table$CI.U[1]) ), digits = 2  )
 ( model2.4.table <- data.frame(parameter=model2.4$reg_table$labels[1], ConditionalOddsRatio=model2.4.est[1], LCI=model2.4.lci[1], UCI=model2.4.uci[1] ) )
 ```
 
-As expected, the confidence interval is very large, spanning OR values from 0.04 to 38.95. Consequently, we cannot rule out that getting a placebo instead of RSV immunoprophylaxis has either a strong protective effect or a highly damaging effect.
+As expected, the confidence interval is very large, spanning OR values from 0.04 to 36.27. Consequently, we cannot rule out that getting a placebo instead of RSV immunoprophylaxis has either a strong protective effect or a highly damaging effect.
 
 In sum, our analyses provide insufficient evidence that high-risk infants **not receiving RSV immunoprophylaxis** are at any greater odds of developing subsequent wheeze than their counterparts who receive RSV immunoprophylaxis.  
